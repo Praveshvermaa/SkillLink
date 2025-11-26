@@ -26,6 +26,7 @@ import {
 
 import BookingForm from "./BookingForm";
 import MessageProviderButton from "./MessageProviderButton";
+import DeleteSkillButton from "./DeleteSkillButton";
 
 export default async function SkillDetailPage({
     params,
@@ -145,8 +146,8 @@ export default async function SkillDetailPage({
 
                         <CardContent>
                             {isOwner ? (
-                                <div className="text-center space-y-4 bg-muted/30 rounded-xl p-6">
-                                    <p className="text-muted-foreground">
+                                <div className="space-y-3 bg-muted/30 rounded-xl p-6">
+                                    <p className="text-muted-foreground text-center">
                                         You listed this skill.
                                     </p>
                                     <Link href="/provider/skills">
@@ -154,6 +155,7 @@ export default async function SkillDetailPage({
                                             Manage Skills
                                         </Button>
                                     </Link>
+                                    <DeleteSkillButton skillId={skill.id} />
                                 </div>
                             ) : (
                                 <BookingForm

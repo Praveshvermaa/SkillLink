@@ -128,3 +128,16 @@
         @apply bg-background text-foreground;
     }
 }
+
+/* Microsoft Edge compatibility fixes */
+html {
+    overflow-x: hidden;
+    width: 100%;
+}
+
+body {
+    overflow-x: hidden;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}

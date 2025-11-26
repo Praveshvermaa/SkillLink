@@ -25,7 +25,49 @@ export default function SkillsPage() {
   const q = searchParams.get('q');
   const [skills, setSkills] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
+  // Get user location on mount
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+          });
+          setLocationError(null); // Clear any previous errors
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          let msg = "Could not get your location. Results may not be sorted by distance.";
+
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              msg = "Location access was denied. Please enable location permissions to find skills near you.";
+              break;
+            case error.POSITION_UNAVAILABLE:
+              msg = "Location information is unavailable.";
+              break;
+            case error.TIMEOUT:
+              msg = "Location request timed out.";
+              break;
+          }
+          setLocationError(msg);
+        },
+        {
+          enableHighAccuracy: false,
+          timeout: 15000,
+          maximumAge: 60000
+        }
+      );
+    } else {
+      setLocationError("Geolocation is not supported by your browser.");
+    }
+  }, []);
+
+  // Load and sort skills
   useEffect(() => {
     async function loadSkills() {
       const supabase = createClient();
@@ -49,12 +91,55 @@ export default function SkillsPage() {
         console.error("Error fetching skills:", error);
       }
 
-      setSkills(data || []);
+      let loadedSkills = data || [];
+
+      // Calculate distance and sort if user location is available
+      if (userLocation) {
+        console.log('User location:', userLocation);
+        loadedSkills = loadedSkills.map(skill => {
+          if (skill.latitude && skill.longitude) {
+            const distance = calculateDistance(
+              userLocation.lat,
+              userLocation.lon,
+              skill.latitude,
+              skill.longitude
+            );
+            console.log(`Skill "${skill.title}" - Distance: ${distance.toFixed(2)} km`);
+            return { ...skill, distance };
+          }
+          console.log(`Skill "${skill.title}" - No location data (lat: ${skill.latitude}, lon: ${skill.longitude})`);
+          return { ...skill, distance: Infinity };
+        });
+
+        loadedSkills.sort((a, b) => a.distance - b.distance);
+      } else {
+        console.log('User location not available yet');
+      }
+
+      setSkills(loadedSkills);
       setLoading(false);
     }
 
     loadSkills();
-  }, [q]);
+  }, [q, userLocation]);
+
+  // Haversine formula to calculate distance in km
+  function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
+    const R = 6371; // Radius of the earth in km
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c; // Distance in km
+    return d;
+  }
+
+  function deg2rad(deg: number) {
+    return deg * (Math.PI / 180);
+  }
 
   if (loading) {
     return (
@@ -84,6 +169,18 @@ export default function SkillsPage() {
         </form>
       </div>
 
+      {/* Location Status */}
+      {userLocation && (
+        <div className="text-sm text-green-600 bg-green-50 p-2 rounded-md">
+          📍 Location enabled - showing skills sorted by distance
+        </div>
+      )}
+      {locationError && (
+        <div className="text-sm text-yellow-600 bg-yellow-50 p-2 rounded-md">
+          {locationError}
+        </div>
+      )}
+
       {/* Skills Grid */}
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {skills?.map((skill, i) => (
@@ -104,6 +201,13 @@ export default function SkillsPage() {
                       <Badge variant="secondary" className="text-xs">
                         {skill.category}
                       </Badge>
+                      {skill.distance !== undefined && skill.distance !== Infinity && (
+                        <Badge variant="outline" className="text-xs border-primary/20 text-primary">
+                          {skill.distance < 1
+                            ? `${(skill.distance * 1000).toFixed(0)} m`
+                            : `${skill.distance.toFixed(1)} km`} away
+                        </Badge>
+                      )}
                     </CardDescription>
                   </div>
 

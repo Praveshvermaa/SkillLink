@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { LocationInput } from "@/components/LocationInput";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -114,11 +115,20 @@ export default function EditProfileForm({ initialData }: { initialData: any }) {
                         {/* Address */}
                         <div className="space-y-2">
                             <Label htmlFor="address">Address</Label>
-                            <Input
+                            <LocationInput
                                 id="address"
                                 name="address"
                                 defaultValue={initialData?.address}
+                                placeholder="Start typing your address..."
+                                onLocationSelect={(location, lat, lon) => {
+                                    const latInput = document.getElementById('latitude') as HTMLInputElement;
+                                    const lonInput = document.getElementById('longitude') as HTMLInputElement;
+                                    if (latInput) latInput.value = lat?.toString() || '';
+                                    if (lonInput) lonInput.value = lon?.toString() || '';
+                                }}
                             />
+                            <input type="hidden" id="latitude" name="latitude" defaultValue={initialData?.latitude} />
+                            <input type="hidden" id="longitude" name="longitude" defaultValue={initialData?.longitude} />
                         </div>
 
                         {/* Error Message */}

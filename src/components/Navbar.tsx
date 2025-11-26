@@ -29,8 +29,14 @@ export function Navbar({ user }: NavbarProps) {
   ];
 
   const handleLogout = async () => {
-    toast.loading("Logging out...");
-    await signout();
+    const toastId = toast.loading("Logging out...");
+    try {
+      await signout();
+      toast.dismiss(toastId);
+    } catch (error) {
+      toast.dismiss(toastId);
+      toast.error("Failed to logout");
+    }
   };
 
   const NavItem = ({ href, label }: any) => (

@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { LocationInput } from '@/components/LocationInput'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -143,13 +144,21 @@ export default function CreateSkillForm() {
                             <Label htmlFor="address">
                                 Service Area / Address <span className="text-red-500">*</span>
                             </Label>
-                            <Input
+                            <LocationInput
                                 id="address"
                                 name="address"
                                 placeholder="Where do you provide this service?"
                                 required
                                 className="rounded-xl"
+                                onLocationSelect={(location, lat, lon) => {
+                                    const latInput = document.getElementById('latitude') as HTMLInputElement;
+                                    const lonInput = document.getElementById('longitude') as HTMLInputElement;
+                                    if (latInput) latInput.value = lat?.toString() || '';
+                                    if (lonInput) lonInput.value = lon?.toString() || '';
+                                }}
                             />
+                            <input type="hidden" id="latitude" name="latitude" />
+                            <input type="hidden" id="longitude" name="longitude" />
                         </div>
 
                         {/* Error Message */}

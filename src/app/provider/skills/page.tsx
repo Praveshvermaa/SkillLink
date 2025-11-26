@@ -5,16 +5,31 @@ import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { Trash2 } from "lucide-react";
 
 import CreateSkillForm from './create-skill-form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { deleteSkill } from '../actions';
 
 export default function ProviderSkillsPage() {
     const router = useRouter();
     const [skills, setSkills] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [skillToDelete, setSkillToDelete] = useState<string | null>(null);
+    const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
         async function loadData() {
@@ -50,6 +65,31 @@ export default function ProviderSkillsPage() {
 
         loadData();
     }, [router]);
+
+    const handleDeleteClick = (skillId: string) => {
+        setSkillToDelete(skillId);
+        setDeleteDialogOpen(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!skillToDelete) return;
+
+        setDeleting(true);
+        const result = await deleteSkill(skillToDelete);
+
+        if (result.error) {
+            alert(result.error);
+            setDeleting(false);
+            setDeleteDialogOpen(false);
+            return;
+        }
+
+        // Remove the skill from the local state
+        setSkills(skills.filter(s => s.id !== skillToDelete));
+        setDeleting(false);
+        setDeleteDialogOpen(false);
+        setSkillToDelete(null);
+    };
 
     if (loading) {
         return (
@@ -101,7 +141,7 @@ export default function ProviderSkillsPage() {
                                 <Card className="rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-[2px] transition-all bg-card/60 backdrop-blur-md">
                                     <CardHeader>
                                         <div className="flex justify-between items-start">
-                                            <div>
+                                            <div className="flex-1">
                                                 <CardTitle className="text-xl font-semibold">
                                                     {skill.title}
                                                 </CardTitle>
@@ -111,6 +151,14 @@ export default function ProviderSkillsPage() {
                                                     </Badge>
                                                 </CardDescription>
                                             </div>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => handleDeleteClick(skill.id)}
+                                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
                                         </div>
                                     </CardHeader>
 
@@ -137,6 +185,28 @@ export default function ProviderSkillsPage() {
                     </div>
                 </motion.div>
             </div>
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete your skill listing.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleDeleteConfirm}
+                            disabled={deleting}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            {deleting ? 'Deleting...' : 'Delete'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }

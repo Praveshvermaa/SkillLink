@@ -33,11 +33,16 @@ export async function updateProfile(prevState: any, formData: FormData) {
         }
     }
 
+    const latitude = formData.get('latitude') ? parseFloat(formData.get('latitude') as string) : null
+    const longitude = formData.get('longitude') ? parseFloat(formData.get('longitude') as string) : null
+
     const updates: any = {
         name,
         phone,
         bio,
         address,
+        latitude,
+        longitude,
         // updated_at: new Date().toISOString(), // Supabase handles this if configured, or we add it
     }
 
