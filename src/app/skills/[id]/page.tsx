@@ -27,6 +27,8 @@ import {
 import BookingForm from "./BookingForm";
 import MessageProviderButton from "./MessageProviderButton";
 import DeleteSkillButton from "./DeleteSkillButton";
+import { getReviewsByProvider } from "@/app/reviews/actions";
+import { ReviewList } from "@/components/reviews/ReviewList";
 
 export default async function SkillDetailPage({
     params,
@@ -52,6 +54,10 @@ export default async function SkillDetailPage({
         .single();
 
     if (error || !skill) notFound();
+
+    if (error || !skill) notFound();
+
+    const reviews = await getReviewsByProvider(skill.provider_id);
 
     const isOwner = user?.id === skill.provider_id;
 
@@ -166,6 +172,12 @@ export default async function SkillDetailPage({
                             )}
                         </CardContent>
                     </Card>
+                </div>
+
+                {/* Reviews Section */}
+                <div className="lg:col-span-2 space-y-6">
+                    <h2 className="text-2xl font-bold tracking-tight">Reviews</h2>
+                    <ReviewList reviews={reviews} />
                 </div>
             </div>
         </div >

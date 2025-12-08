@@ -9,6 +9,7 @@ import { Calendar, Clock, MapPin, MessageSquare, Phone, DollarSign } from 'lucid
 import { updateBookingStatus } from '@/app/bookings/actions'
 import { createOrGetChat } from '@/app/chat/actions'
 import { toast } from 'sonner'
+import { ReviewDialog } from '@/components/reviews/ReviewDialog'
 
 type Profile = {
   id: string
@@ -237,6 +238,10 @@ export default function BookingsClient({ initialBookings, currentUserId }: Booki
                       Mark as Completed
                     </Button>
                   )}
+
+                  {booking.status === 'completed' && !isProvider(booking) && (
+                    <ReviewDialog bookingId={booking.id} />
+                  )}
                 </CardContent>
               </Card>
             ))}
@@ -340,6 +345,10 @@ export default function BookingsClient({ initialBookings, currentUserId }: Booki
                     >
                       Cancel Booking
                     </Button>
+                  )}
+
+                  {booking.status === 'completed' && (
+                    <ReviewDialog bookingId={booking.id} />
                   )}
                 </CardContent>
               </Card>

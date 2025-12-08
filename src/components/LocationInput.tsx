@@ -55,7 +55,7 @@ export function LocationInput({
                 const response = await fetch(
                     `https://photon.komoot.io/api/?q=${encodeURIComponent(
                         debouncedQuery
-                    )}&limit=10`,
+                    )}&limit=50`,
                     {
                         headers: {
                             "Accept-Language": "en-US,en;q=0.9",
@@ -73,7 +73,9 @@ export function LocationInput({
                         const parts = [
                             properties.name,
                             properties.street,
+                            properties.district,
                             properties.city,
+                            properties.county,
                             properties.state,
                             properties.country
                         ].filter(Boolean);
