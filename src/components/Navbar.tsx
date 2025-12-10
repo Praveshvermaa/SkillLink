@@ -23,6 +23,10 @@ export function Navbar({ user }: NavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
 
+  // Treat reset-password page as guest page (show login/signup instead of profile/logout)
+  const isResetPasswordPage = pathname === '/auth/reset-password';
+  const showGuestNav = !user || isResetPasswordPage;
+
   const routes = [
     { href: "/skills", label: "Find Skills" },
     { href: "/bookings", label: "Bookings" },
@@ -68,8 +72,8 @@ export function Navbar({ user }: NavbarProps) {
   );
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 shadow-sm">
-      <div className="container flex h-16 items-center justify-between px-4 md:px-6">
+    <header className="sticky top-0 z-50 w-full max-w-full border-b bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 shadow-sm">
+      <div className="container flex h-16 items-center justify-between px-4 md:px-6 max-w-screen-2xl mx-auto">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <Image
@@ -78,12 +82,13 @@ export function Navbar({ user }: NavbarProps) {
             width={40}
             height={40}
             className="object-contain"
+            style={{ width: "auto", height: "auto" }}
           />
           <span className="text-xl font-bold tracking-tight">SkillLink</span>
         </Link>
 
         {/* Desktop Nav */}
-        {user && (
+        {!showGuestNav && (
           <nav className="hidden md:flex items-center gap-6">
             {routes.map((r) => (
               <NavItem key={r.href} href={r.href} label={r.label} />
@@ -95,7 +100,18 @@ export function Navbar({ user }: NavbarProps) {
         <div className="hidden md:flex items-center gap-4">
           <ModeToggle />
 
-          {user ? (
+          {showGuestNav ? (
+            <>
+              <Link href="/auth/login">
+                <Button variant="ghost" size="sm">
+                  Log in
+                </Button>
+              </Link>
+              <Link href="/auth/signup">
+                <Button size="sm">Get Started</Button>
+              </Link>
+            </>
+          ) : (
             <>
               <Link href="/profile">
                 <Button variant="ghost" size="sm">
@@ -113,17 +129,6 @@ export function Navbar({ user }: NavbarProps) {
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
               </Button>
-            </>
-          ) : (
-            <>
-              <Link href="/auth/login">
-                <Button variant="ghost" size="sm">
-                  Log in
-                </Button>
-              </Link>
-              <Link href="/auth/signup">
-                <Button size="sm">Get Started</Button>
-              </Link>
             </>
           )}
         </div>
@@ -158,7 +163,7 @@ export function Navbar({ user }: NavbarProps) {
             className="md:hidden border-t p-4 space-y-4 bg-background/95 backdrop-blur"
           >
             <nav className="flex flex-col gap-4">
-              {user &&
+              {!showGuestNav &&
                 routes.map((r) => (
                   <Link
                     key={r.href}
@@ -177,7 +182,27 @@ export function Navbar({ user }: NavbarProps) {
 
               {/* Mobile bottom actions */}
               <div className="flex flex-col gap-2 pt-4 border-t">
-                {user ? (
+                {showGuestNav ? (
+                  <>
+                    <Link
+                      href="/auth/login"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <Button variant="ghost" className="w-full justify-start">
+                        Log in
+                      </Button>
+                    </Link>
+
+                    <Link
+                      href="/auth/signup"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <Button className="w-full justify-start">
+                        Get Started
+                      </Button>
+                    </Link>
+                  </>
+                ) : (
                   <>
                     <Link
                       href="/profile"
@@ -197,26 +222,6 @@ export function Navbar({ user }: NavbarProps) {
                       <LogOut className="h-4 w-4 mr-2" />
                       Logout
                     </Button>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      href="/auth/login"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      <Button variant="ghost" className="w-full justify-start">
-                        Log in
-                      </Button>
-                    </Link>
-
-                    <Link
-                      href="/auth/signup"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      <Button className="w-full justify-start">
-                        Get Started
-                      </Button>
-                    </Link>
                   </>
                 )}
               </div>

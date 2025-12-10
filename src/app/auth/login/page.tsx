@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff } from 'lucide-react';
 
-import { login } from '@/app/auth/actions';
+import { login, resendVerification } from '@/app/auth/actions';
 import { loginSchema, type LoginSchema } from '@/utils/validators';
 
 import {
@@ -142,6 +142,28 @@ export default function LoginPage() {
               {state?.error && (
                 <div className="rounded-md bg-red-100 p-3 text-sm font-medium text-red-700 dark:bg-red-900/20 dark:text-red-300">
                   {state.error}
+                  {state.code === 'email_not_confirmed' && state.email && (
+                    <div className="mt-2">
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="h-auto p-0 text-red-700 underline hover:text-red-800 dark:text-red-300 dark:hover:text-red-200"
+                        onClick={async () => {
+                          const promise = resendVerification(state.email as string);
+                          toast.promise(promise, {
+                            loading: 'Sending verification email...',
+                            success: (data: { error?: string; success?: string }) => {
+                              if (data.error) throw new Error(data.error);
+                              return 'Verification email sent! Please check your inbox.';
+                            },
+                            error: (err: any) => err.message || 'Failed to send verification email',
+                          });
+                        }}
+                      >
+                        Resend verification email
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>

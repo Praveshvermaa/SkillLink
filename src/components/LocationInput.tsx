@@ -31,13 +31,19 @@ export function LocationInput({
     const [suggestions, setSuggestions] = React.useState<Suggestion[]>([]);
     const [isOpen, setIsOpen] = React.useState(false);
     const [isLoading, setIsLoading] = React.useState(false);
+    const [isMounted, setIsMounted] = React.useState(false);
 
     // Handle controlled/uncontrolled value
     React.useEffect(() => {
         if (controlledValue !== undefined) {
-            setQuery(controlledValue.toString());
+            setQuery(controlledValue?.toString() ?? "");
         }
     }, [controlledValue]);
+
+    // Prevent hydration mismatch by only showing client-side features after mount
+    React.useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const debouncedQuery = useDebounce(query, 500);
 
@@ -154,19 +160,19 @@ export function LocationInput({
                 autoComplete="off"
             />
             <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                {isLoading ? (
+                {isMounted && isLoading ? (
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                 ) : (
                     <MapPin className="h-4 w-4" />
                 )}
             </div>
 
-            {isOpen && suggestions.length > 0 && (
+            {isMounted && isOpen && suggestions.length > 0 && (
                 <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95">
                     <ul className="max-h-[200px] overflow-auto py-1">
-                        {suggestions.map((suggestion) => (
+                        {suggestions.map((suggestion, index) => (
                             <li
-                                key={suggestion.place_id}
+                                key={`${suggestion.place_id}-${index}`}
                                 onClick={() => handleSelect(suggestion)}
                                 className="relative flex cursor-default select-none items-center px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 cursor-pointer"
                             >

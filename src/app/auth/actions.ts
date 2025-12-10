@@ -42,9 +42,23 @@ export async function signup(prevState: any, formData: FormData) {
     const password = formData.get('password') as string
     const name = formData.get('name') as string
     const phone = formData.get('phone') as string
+    const address = formData.get('address') as string
+    const latitude = formData.get('latitude') ? parseFloat(formData.get('latitude') as string) : null
+    const longitude = formData.get('longitude') ? parseFloat(formData.get('longitude') as string) : null
     const role = formData.get('role') as string // 'user' or 'provider'
     const headersList = await headers()
     const origin = headersList.get('origin')
+
+    // Check if user already exists in profiles
+    const { data: existingUser } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('email', email)
+        .single()
+
+    if (existingUser) {
+        return { error: 'Email already exists' }
+    }
 
     const { data, error } = await supabase.auth.signUp({
         email,
@@ -54,8 +68,11 @@ export async function signup(prevState: any, formData: FormData) {
                 name,
                 phone,
                 role,
+                address,
+                latitude,
+                longitude,
             },
-            emailRedirectTo: `${origin}/auth/callback?next=/auth/verified`,
+            emailRedirectTo: `${origin}/auth/callback?type=signup`,
         },
     })
 
@@ -82,6 +99,9 @@ export async function signup(prevState: any, formData: FormData) {
                 email,
                 phone,
                 role,
+                address,
+                latitude,
+                longitude,
             })
 
         if (profileError) {
@@ -108,7 +128,7 @@ export async function forgotPassword(prevState: any, formData: FormData) {
     const origin = headersList.get('origin')
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${origin}/auth/callback?next=/auth/reset-password`,
+        redirectTo: `${origin}/auth/callback?type=recovery`,
     })
 
     if (error) {
@@ -149,7 +169,7 @@ export async function resendVerification(email: string): Promise<{ error: string
         type: 'signup',
         email,
         options: {
-            emailRedirectTo: `${origin}/auth/callback?next=/auth/verified`,
+            emailRedirectTo: `${origin}/auth/callback?type=signup`,
         }
     })
 

@@ -3,10 +3,12 @@
 import { useEffect, useState, startTransition, useActionState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { Mail, User, Briefcase } from 'lucide-react';
+
+import { LocationInput } from '@/components/LocationInput';
 
 import { signup } from '@/app/auth/actions';
 import { signupSchema, type SignupInput } from '@/utils/validators';
@@ -36,16 +38,17 @@ export default function SignupPage() {
   const [state, formAction, isPending] = useActionState(signup, null);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<SignupInput>({
+  const methods = useForm<SignupInput>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
       role: 'user',
+      latitude: undefined,
+      longitude: undefined,
     },
   });
+
+  const { control, setValue } = methods;
+  const { register, handleSubmit, formState: { errors } } = methods;
 
   // 🔥 toast notifications
   useEffect(() => {
@@ -64,7 +67,9 @@ export default function SignupPage() {
   const onSubmit = (data: SignupInput) => {
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
-      formData.append(key, value);
+      if (value !== undefined && value !== null) {
+        formData.append(key, value.toString());
+      }
     });
 
     startTransition(() => {
@@ -133,6 +138,32 @@ export default function SignupPage() {
                 />
                 {errors.phone && (
                   <p className="text-sm text-red-500">{errors.phone.message}</p>
+                )}
+              </div>
+
+              {/* Address */}
+              <div className="space-y-2">
+                <Label htmlFor="address">Address</Label>
+                <Controller
+                  control={control}
+                  name="address"
+                  render={({ field: { onChange, value } }) => (
+                    <LocationInput
+                      id="address"
+                      placeholder="123 Main St, City, Country"
+                      className="h-11 rounded-lg"
+                      value={value}
+                      onChange={onChange}
+                      onLocationSelect={(address, lat, lon) => {
+                        onChange(address);
+                        setValue('latitude', lat);
+                        setValue('longitude', lon);
+                      }}
+                    />
+                  )}
+                />
+                {errors.address && (
+                  <p className="text-sm text-red-500">{errors.address.message}</p>
                 )}
               </div>
 

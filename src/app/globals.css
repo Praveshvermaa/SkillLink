@@ -1,3 +1,6 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 @import "tailwindcss";
 
 @plugin "tailwindcss-animate";
@@ -129,15 +132,100 @@
     }
 }
 
-/* Microsoft Edge compatibility fixes */
+/* Microsoft Edge compatibility fixes - Comprehensive */
+
+/* Prevent horizontal overflow on root elements */
 html {
-    overflow-x: hidden;
+    overflow-x: hidden !important;
     width: 100%;
+    max-width: 100vw;
+    position: relative;
 }
 
 body {
-    overflow-x: hidden;
+    overflow-x: hidden !important;
     width: 100%;
+    max-width: 100vw;
     margin: 0;
     padding: 0;
+    position: relative;
+}
+
+/* Fix all elements to prevent overflow */
+* {
+    box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+    max-width: 100%;
+}
+
+/* Fix container elements specifically for Edge */
+.container {
+    max-width: 100% !important;
+    overflow-x: hidden;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Fix flexbox min-width issue in Edge */
+.flex,
+[class*="flex"] {
+    min-width: 0;
+}
+
+/* Fix grid layout issues in Edge */
+.grid,
+[class*="grid"] {
+    min-width: 0;
+}
+
+/* Prevent images and media from causing overflow */
+img,
+video,
+svg,
+canvas {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Fix absolute positioned elements */
+[class*="absolute"] {
+    max-width: 100vw;
+}
+
+/* Prevent text overflow */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+div {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Fix sections and main containers */
+section,
+main,
+article {
+    max-width: 100vw;
+    overflow-x: hidden;
+}
+
+/* Edge-specific fixes using CSS hacks */
+@supports (-ms-ime-align: auto) {
+    body {
+        overflow-x: hidden !important;
+    }
+
+    .container {
+        width: 100% !important;
+    }
 }

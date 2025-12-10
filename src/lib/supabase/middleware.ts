@@ -39,19 +39,35 @@ export async function updateSession(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
+    // Define auth pages that don't require verification
+    const publicAuthPages = ['/auth/login', '/auth/signup', '/auth/forgot-password', '/auth/callback', '/auth/verified'];
+    const isPublicAuthPage = publicAuthPages.some(page => request.nextUrl.pathname.startsWith(page));
+    const isResetPasswordPage = request.nextUrl.pathname.startsWith('/auth/reset-password');
+
+    // If no user and trying to access protected pages, redirect to login
     if (
         !user &&
         !request.nextUrl.pathname.startsWith('/auth') &&
         request.nextUrl.pathname !== '/'
     ) {
-        // no user, potentially respond by redirecting the user to the login page
         const url = request.nextUrl.clone()
         url.pathname = '/auth/login'
         return NextResponse.redirect(url)
     }
 
-    // If user is authenticated and tries to access auth pages (except reset-password) or landing page, redirect to dashboard
-    if (user && ((request.nextUrl.pathname.startsWith('/auth') && request.nextUrl.pathname !== '/auth/reset-password') || request.nextUrl.pathname === '/')) {
+    // If user exists but email is not verified
+    if (user && !user.email_confirmed_at) {
+        // Allow access to public auth pages and reset password
+        if (!isPublicAuthPage && !isResetPasswordPage && request.nextUrl.pathname !== '/') {
+            // Redirect unverified users to a verification pending page
+            const url = request.nextUrl.clone()
+            url.pathname = '/auth/verified'
+            return NextResponse.redirect(url)
+        }
+    }
+
+    // If user is authenticated and verified, redirect from auth pages (except reset-password) to dashboard
+    if (user && user.email_confirmed_at && (isPublicAuthPage || request.nextUrl.pathname === '/')) {
         const url = request.nextUrl.clone()
         url.pathname = '/dashboard'
         return NextResponse.redirect(url)
