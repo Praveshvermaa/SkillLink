@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useSearchParams } from 'next/navigation';
 import {
     Card,
     CardHeader,
@@ -14,6 +15,9 @@ import {
 } from '@/components/ui/card';
 
 export default function AuthCodeErrorPage() {
+    const searchParams = useSearchParams();
+    const errorMessage = searchParams.get('error');
+
     return (
         <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-muted/30 px-4 py-10">
             <motion.div
@@ -38,6 +42,13 @@ export default function AuthCodeErrorPage() {
                     </CardHeader>
 
                     <CardContent className="space-y-4">
+                        {errorMessage && (
+                            <div className="rounded-lg bg-red-50 dark:bg-red-900/20 p-4 text-sm">
+                                <p className="font-medium text-red-800 dark:text-red-200 mb-1">Error Details:</p>
+                                <p className="text-red-700 dark:text-red-300">{errorMessage}</p>
+                            </div>
+                        )}
+
                         <div className="rounded-lg bg-muted p-4 text-sm">
                             <p className="mb-2">This could happen if:</p>
                             <ul className="list-disc list-inside space-y-1 text-muted-foreground">
