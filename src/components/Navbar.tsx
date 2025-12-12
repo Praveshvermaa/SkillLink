@@ -29,6 +29,7 @@ export function Navbar({ user }: NavbarProps) {
 
   const routes = [
     { href: "/skills", label: "Find Skills" },
+    { href: "/map", label: "Map" },
     { href: "/bookings", label: "Bookings" },
     { href: "/chat", label: "Messages" },
   ];
