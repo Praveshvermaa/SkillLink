@@ -18,6 +18,18 @@ export async function login(prevState: any, formData: FormData) {
         return { success: false, error: validatedFields.error.issues[0].message }
     }
 
+    // First, check if user exists in profiles table
+    const { data: existingUser } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('email', email)
+        .single()
+
+    if (!existingUser) {
+        return { success: false, error: 'User not registered. Please sign up first.' }
+    }
+
+    // Try to sign in
     const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -25,9 +37,17 @@ export async function login(prevState: any, formData: FormData) {
 
     if (error) {
         console.error('Login error:', error)
+
+        // Check for specific error types
         if (error.message.includes('Email not confirmed')) {
             return { success: false, error: 'Email not confirmed', code: 'email_not_confirmed', email }
         }
+
+        // If user exists but login failed, it's likely a wrong password
+        if (error.message.includes('Invalid login credentials')) {
+            return { success: false, error: 'Password is incorrect. Please try again.' }
+        }
+
         return { success: false, error: error.message }
     }
 

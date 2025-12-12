@@ -95,21 +95,26 @@ export default function VerifiedPage() {
                 <Card className="w-full max-w-md text-center">
                     <CardHeader>
                         <div className="flex justify-center mb-4">
-                            <CheckCircle className="h-12 w-12 text-green-500" />
+                            <CheckCircle className="h-16 w-16 text-green-500" />
                         </div>
-                        <CardTitle className="text-2xl">Email Verified!</CardTitle>
-                        <CardDescription>
-                            Your email has been successfully verified. You can now log in to access your account.
+                        <CardTitle className="text-3xl font-bold">Email Verified!</CardTitle>
+                        <CardDescription className="text-base mt-2">
+                            Your email has been successfully verified.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-sm text-muted-foreground">
-                            Thank you for verifying your email address. Please log in to continue.
-                        </p>
+                        <div className="rounded-lg bg-green-50 dark:bg-green-900/20 p-4 mb-4">
+                            <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                                ✓ Email verification complete
+                            </p>
+                            <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                                You can now log in to access your account.
+                            </p>
+                        </div>
                     </CardContent>
                     <CardFooter className="flex justify-center">
                         <Link href="/auth/login" className="w-full">
-                            <Button className="w-full">Log In</Button>
+                            <Button className="w-full h-11 text-base">Continue to Login</Button>
                         </Link>
                     </CardFooter>
                 </Card>
