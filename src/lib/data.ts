@@ -34,7 +34,17 @@ export async function getSkills(query?: string) {
     return data
 }
 
+import { getCached, setCached } from '@/lib/redis'
+
 export async function getSkill(id: string) {
+    const cacheKey = `skill:detail:${id}`;
+
+    // Try fetching from cache
+    const cachedData = await getCached<any>(cacheKey);
+    if (cachedData) {
+        return cachedData;
+    }
+
     const supabase = await createClient()
     const { data, error } = await supabase
         .from('skills')
@@ -42,6 +52,10 @@ export async function getSkill(id: string) {
         .eq('id', id)
         .single()
 
-    if (error) return null
+    if (error) return null;
+
+    // Cache individual skill details for 300 seconds (5 minutes)
+    await setCached(cacheKey, data, 300);
+
     return data
 }

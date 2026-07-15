@@ -34,7 +34,7 @@ export default function MessageProviderButton({ providerId }: { providerId?: str
         <form action={handleClick}>
             <Button variant="outline" size="sm" type="submit" disabled={isLoading}>
                 <MessageCircle className="h-4 w-4 mr-2" />
-                {isLoading ? 'Loading...' : 'Message Provider'}
+                {isLoading ? 'Loading...' : 'Message'}
             </Button>
         </form>
     )

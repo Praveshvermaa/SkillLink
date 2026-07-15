@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { deleteCached, deletePattern } from '@/lib/redis'
 
 export async function createSkill(prevState: any, formData: FormData) {
     const supabase = await createClient()
@@ -37,6 +38,11 @@ export async function createSkill(prevState: any, formData: FormData) {
         console.error('Create skill error:', error)
         return { error: error.message }
     }
+
+    // Invalidate Redis caches
+    await deletePattern('skills:bounds:*');
+    await deletePattern('skills:distance:*');
+    await deletePattern('skills:default:*');
 
     revalidatePath('/skills')
     revalidatePath('/dashboard')
@@ -77,6 +83,12 @@ export async function deleteSkill(skillId: string) {
         console.error('Delete skill error:', deleteError)
         return { error: deleteError.message }
     }
+
+    // Invalidate Redis caches
+    await deletePattern('skills:bounds:*');
+    await deletePattern('skills:distance:*');
+    await deletePattern('skills:default:*');
+    await deleteCached(`skill:detail:${skillId}`);
 
     revalidatePath('/skills')
     revalidatePath('/provider/skills')

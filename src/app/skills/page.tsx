@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from "@/lib/supabase/client";
+import { getSkillsSortedByDistance, getSkillsDefault } from '@/app/skills/actions';
 import { useSearchParams } from 'next/navigation';
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -70,76 +70,33 @@ export default function SkillsPage() {
   // Load and sort skills
   useEffect(() => {
     async function loadSkills() {
-      const supabase = createClient();
+      let data;
+      let error;
 
-      // Build query
-      let query = supabase
-        .from("skills")
-        .select(
-          `
-          *,
-          provider:profiles(name, avatar_url, role)
-        `
-        )
-        .order("created_at", { ascending: false });
-
-      if (q) query = query.ilike("title", `%${q}%`);
-
-      const { data, error } = await query;
+      if (userLocation) {
+        const res = await getSkillsSortedByDistance(
+          userLocation.lat,
+          userLocation.lon,
+          q
+        );
+        data = res.data;
+        error = res.error;
+      } else {
+        const res = await getSkillsDefault(q);
+        data = res.data;
+        error = res.error;
+      }
 
       if (error) {
         console.error("Error fetching skills:", error);
       }
 
-      let loadedSkills = data || [];
-
-      // Calculate distance and sort if user location is available
-      if (userLocation) {
-        console.log('User location:', userLocation);
-        loadedSkills = loadedSkills.map(skill => {
-          if (skill.latitude && skill.longitude) {
-            const distance = calculateDistance(
-              userLocation.lat,
-              userLocation.lon,
-              skill.latitude,
-              skill.longitude
-            );
-            console.log(`Skill "${skill.title}" - Distance: ${distance.toFixed(2)} km`);
-            return { ...skill, distance };
-          }
-          console.log(`Skill "${skill.title}" - No location data (lat: ${skill.latitude}, lon: ${skill.longitude})`);
-          return { ...skill, distance: Infinity };
-        });
-
-        loadedSkills.sort((a, b) => a.distance - b.distance);
-      } else {
-        console.log('User location not available yet');
-      }
-
-      setSkills(loadedSkills);
+      setSkills(data || []);
       setLoading(false);
     }
 
     loadSkills();
   }, [q, userLocation]);
-
-  // Haversine formula to calculate distance in km
-  function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
-    const R = 6371; // Radius of the earth in km
-    const dLat = deg2rad(lat2 - lat1);
-    const dLon = deg2rad(lon2 - lon1);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const d = R * c; // Distance in km
-    return d;
-  }
-
-  function deg2rad(deg: number) {
-    return deg * (Math.PI / 180);
-  }
 
   if (loading) {
     return (
