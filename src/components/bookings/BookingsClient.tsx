@@ -67,8 +67,11 @@ export default function BookingsClient({ initialBookings, currentUserId }: Booki
     setMessagingLoading(userId)
     try {
       await createOrGetChat(userId)
-      router.push('/chat')
-    } catch (error) {
+    } catch (error: any) {
+      // Next.js redirect() throws a NEXT_REDIRECT error — let it propagate
+      if (error?.digest?.startsWith('NEXT_REDIRECT')) {
+        throw error
+      }
       toast.error('Failed to open chat')
       console.error(error)
     } finally {

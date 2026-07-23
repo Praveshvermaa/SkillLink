@@ -77,15 +77,20 @@ export function Navbar({ user }: NavbarProps) {
       <div className="container flex h-16 items-center justify-between px-4 md:px-6 max-w-screen-2xl mx-auto">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <Image
-            src="/skilllink-logo.png"
-            alt="SkillLink Logo"
-            width={40}
-            height={40}
-            className="object-contain"
-            style={{ width: "auto", height: "auto" }}
-          />
-          <span className="text-xl font-bold tracking-tight">SkillLink</span>
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-8">
+            <defs>
+              <linearGradient id="logo-grad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#3b82f6" />
+                <stop offset="50%" stopColor="#8b5cf6" />
+                <stop offset="100%" stopColor="#ec4899" />
+              </linearGradient>
+            </defs>
+            <path d="M24 10C24 7.5 21.5 6 18 6C13 6 10 9 10 13C10 18 14 18 18 20C22 22 22 24 22 26C22 28.5 19.5 29.5 16 29.5C12 29.5 8 27.5 8 25" stroke="url(#logo-grad)" strokeWidth="3" strokeLinecap="round" />
+            <circle cx="24" cy="10" r="3" fill="#3b82f6" stroke="white" strokeWidth="1.5" />
+            <circle cx="15" cy="18.5" r="2.5" fill="#8b5cf6" stroke="white" strokeWidth="1.5" />
+            <circle cx="8" cy="25" r="3" fill="#ec4899" stroke="white" strokeWidth="1.5" />
+          </svg>
+          <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">SkillLink</span>
         </Link>
 
         {/* Desktop Nav */}
@@ -104,12 +109,14 @@ export function Navbar({ user }: NavbarProps) {
           {showGuestNav ? (
             <>
               <Link href="/auth/login">
-                <Button variant="ghost" size="sm">
-                  Log in
+                <Button variant="outline" size="sm" className="rounded-full border-border/60 hover:bg-muted/50 px-4">
+                  Login
                 </Button>
               </Link>
               <Link href="/auth/signup">
-                <Button size="sm">Get Started</Button>
+                <Button size="sm" className="rounded-full bg-gradient-to-r from-blue-600 via-violet-600 to-orange-500 hover:opacity-90 transition-opacity text-white border-0 font-medium px-4">
+                  Get Started
+                </Button>
               </Link>
             </>
           ) : (

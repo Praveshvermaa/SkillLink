@@ -151,11 +151,13 @@ export default function ChatWindow({
         const groups: { [key: string]: Message[] } = {}
 
         messages.forEach(msg => {
-            const date = new Date(msg.created_at).toLocaleDateString()
-            if (!groups[date]) {
-                groups[date] = []
+            // Use ISO date string (YYYY-MM-DD) as key to avoid locale parsing issues
+            const d = new Date(msg.created_at)
+            const dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+            if (!groups[dateKey]) {
+                groups[dateKey] = []
             }
-            groups[date].push(msg)
+            groups[dateKey].push(msg)
         })
 
         return groups
@@ -173,13 +175,7 @@ export default function ChatWindow({
                     </div>
                     <div>
                         <h2 className="font-semibold text-lg leading-none">{partnerName || 'Chat'}</h2>
-                        <div className="flex items-center gap-1.5 mt-1">
-                            <span className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                            </span>
-                            <p className="text-xs text-muted-foreground font-medium">Online</p>
-                        </div>
+                            <p className="text-xs text-muted-foreground font-medium">Chat</p>
                     </div>
                 </div>
                 <div className="flex gap-2">
@@ -204,11 +200,21 @@ export default function ChatWindow({
                         {/* Date Separator */}
                         <div className="flex items-center justify-center sticky top-0 z-0">
                             <div className="bg-muted/80 backdrop-blur-sm text-muted-foreground text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow-sm border border-border/50">
-                                {new Date(date).toLocaleDateString('en-US', {
-                                    weekday: 'short',
-                                    month: 'short',
-                                    day: 'numeric'
-                                })}
+                                {(() => {
+                                    const [year, month, day] = date.split('-').map(Number);
+                                    const d = new Date(year, month - 1, day);
+                                    const today = new Date();
+                                    const yesterday = new Date();
+                                    yesterday.setDate(yesterday.getDate() - 1);
+
+                                    if (d.toDateString() === today.toDateString()) return 'Today';
+                                    if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+                                    return d.toLocaleDateString('en-US', {
+                                        weekday: 'short',
+                                        month: 'short',
+                                        day: 'numeric'
+                                    });
+                                })()}
                             </div>
                         </div>
 
