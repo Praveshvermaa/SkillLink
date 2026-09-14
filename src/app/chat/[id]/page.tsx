@@ -45,6 +45,14 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
         console.error('Error fetching messages:', messagesError)
     }
 
+    // Mark unread messages sent by the other party as read
+    await supabase
+        .from('messages')
+        .update({ read: true })
+        .eq('chat_id', id)
+        .neq('sender_id', user.id)
+        .eq('read', false)
+
     return (
         <div className="h-[calc(100vh-4rem)] p-4">
             <ChatWindow
@@ -53,6 +61,8 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
                 userId={user.id}
                 partnerName={otherParty?.name}
                 partnerPhone={otherParty?.phone}
+                partnerAvatar={otherParty?.avatar_url}
+                partnerRole={isProvider ? 'Client' : 'Provider'}
             />
         </div>
     )

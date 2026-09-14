@@ -94,3 +94,29 @@ export async function sendMessage(chatId: string, message: string) {
 
     revalidatePath(`/chat/${chatId}`)
 }
+
+export async function markChatMessagesAsRead(chatId: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        return { success: false, error: 'Not authenticated' }
+    }
+
+    const { error } = await supabase
+        .from('messages')
+        .update({ read: true })
+        .eq('chat_id', chatId)
+        .neq('sender_id', user.id)
+        .eq('read', false)
+
+    if (error) {
+        console.error('Error marking messages as read:', error)
+        return { success: false, error: error.message }
+    }
+
+    revalidatePath('/chat')
+    revalidatePath('/dashboard')
+    revalidatePath(`/chat/${chatId}`)
+    return { success: true }
+}

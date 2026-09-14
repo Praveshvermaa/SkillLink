@@ -1,10 +1,9 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { formatDistanceToNow } from 'date-fns';
+import ChatListClient from '@/components/chat/ChatListClient';
 
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Card, CardContent } from '@/components/ui/card';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function ChatListPage() {
     const supabase = await createClient();
@@ -36,57 +35,35 @@ export default async function ChatListPage() {
         );
     }
 
-    return (
-        <div className="container py-10 max-w-2xl">
-            <h1 className="text-3xl font-bold mb-10">Messages</h1>
+    // Fetch unread count for user's chats
+    const chatIds = (chats || []).map((c: any) => c.id);
+    let unreadMap: { [chatId: string]: number } = {};
 
-            {/* Chat List */}
-            <div className="space-y-4">
-                {chats?.map((chat) => {
-                    const isProvider = chat.provider_id === user.id;
-                    const other = isProvider ? chat.user : chat.provider;
+    if (chatIds.length > 0) {
+        const { data: unreadData } = await supabase
+            .from('messages')
+            .select('chat_id')
+            .in('chat_id', chatIds)
+            .neq('sender_id', user.id)
+            .eq('read', false);
 
-                    return (
-                        <Link key={chat.id} href={`/chat/${chat.id}`}>
-                            <Card className="rounded-2xl shadow-sm hover:shadow-md transition-all hover:-translate-y-[2px] bg-card/60 backdrop-blur-sm cursor-pointer">
-                                <CardContent className="p-4 flex items-center gap-4">
-                                    {/* Avatar */}
-                                    <Avatar className="h-12 w-12 border">
-                                        <AvatarImage src={other?.avatar_url || ''} />
-                                        <AvatarFallback className="bg-primary/10 text-primary">
-                                            {other?.name?.charAt(0)?.toUpperCase() || 'U'}
-                                        </AvatarFallback>
-                                    </Avatar>
+        if (unreadData) {
+            unreadData.forEach((m: any) => {
+                unreadMap[m.chat_id] = (unreadMap[m.chat_id] || 0) + 1;
+            });
+        }
+    }
 
-                                    {/* Name + last message */}
-                                    <div className="flex flex-col flex-1 min-w-0">
-                                        <h3 className="font-semibold text-lg truncate">
-                                            {other?.name || 'Unknown User'}
-                                        </h3>
-                                        <p className="text-sm text-muted-foreground truncate">
-                                            {chat.last_message_text || 'Tap to open the conversation'}
-                                        </p>
-                                    </div>
+    const safeChats = (chats || []).map((c: any) => ({
+        id: c.id,
+        created_at: c.created_at,
+        last_message_text: c.last_message_text,
+        user_id: c.user_id,
+        provider_id: c.provider_id,
+        provider: c.provider,
+        user: c.user,
+        unread_count: unreadMap[c.id] || 0,
+    }));
 
-                                    {/* Time badge */}
-                                    <div className="text-xs text-muted-foreground whitespace-nowrap">
-                                        {chat.created_at
-                                            ? formatDistanceToNow(new Date(chat.created_at), { addSuffix: true })
-                                            : ''}
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </Link>
-                    );
-                })}
-
-                {/* Empty State */}
-                {chats?.length === 0 && (
-                    <div className="text-center py-16 rounded-xl border bg-muted/20 backdrop-blur-sm">
-                        <p className="text-muted-foreground text-sm">No conversations yet.</p>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
+    return <ChatListClient initialChats={safeChats} currentUserId={user.id} />;
 }
