@@ -301,13 +301,13 @@ skillproject/
 ![Landing Page](public/screenshots/landing.png)
 
 ### 🛒 Skill Marketplace
-![Skill Marketplace](public/screenshots/marketplace.png)
+![Skill Marketplace](public/screenshots/MarketPlace.png)
 
 ### 📅 Bookings Hub
-![Bookings Hub](public/screenshots/bookings.png)
+![Bookings Hub](public/screenshots/Booking.png)
 
 ### 🗺️ Map View
-![Map View](public/screenshots/map.png)
+![Map View](public/screenshots/Map.png)
 
 ---
 
