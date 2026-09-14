@@ -14,9 +14,9 @@
 
 ---
 
-![Demo](https://via.placeholder.com/900x450.png?text=SkillLink+Demo+Screenshot)
+![Demo](public/screenshots/landing.png)
 
-[Live Demo →](#) · [Report Bug](https://github.com/Praveshvermaa/SkillLink/issues) · [Request Feature](https://github.com/Praveshvermaa/SkillLink/issues)
+[Live Demo →](https://skill-link-five-ruby.vercel.app) · [Report Bug](https://github.com/Praveshvermaa/SkillLink/issues) · [Request Feature](https://github.com/Praveshvermaa/SkillLink/issues)
 
 </div>
 
@@ -297,15 +297,17 @@ skillproject/
 
 ## 📸 Screenshots
 
-> Add screenshots or GIFs of the key pages below.
+### 🏠 Landing Page
+![Landing Page](public/screenshots/landing.png)
 
-| Landing Page | Skill Marketplace | Map View |
-|---|---|---|
-| ![Landing](https://via.placeholder.com/300x200.png?text=Landing+Page) | ![Marketplace](https://via.placeholder.com/300x200.png?text=Skill+Marketplace) | ![Map](https://via.placeholder.com/300x200.png?text=Map+View) |
+### 🛒 Skill Marketplace
+![Skill Marketplace](public/screenshots/marketplace.png)
 
-| Chat | Bookings Dashboard | Provider Panel |
-|---|---|---|
-| ![Chat](https://via.placeholder.com/300x200.png?text=Real-time+Chat) | ![Bookings](https://via.placeholder.com/300x200.png?text=Bookings) | ![Provider](https://via.placeholder.com/300x200.png?text=Provider+Panel) |
+### 📅 Bookings Hub
+![Bookings Hub](public/screenshots/bookings.png)
+
+### 🗺️ Map View
+![Map View](public/screenshots/map.png)
 
 ---
 
